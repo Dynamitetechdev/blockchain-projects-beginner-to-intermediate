@@ -1,5 +1,5 @@
 const { network } = require("hardhat");
-
+const { verify } = require("../utils/verify");
 module.exports = async ({ deployments, getNamedAccounts }) => {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
@@ -15,6 +15,12 @@ module.exports = async ({ deployments, getNamedAccounts }) => {
     waitConfirmations: blockConfirmations,
   });
   log("----Contract Deployed----");
+
+  if (chainId !== 31337 && process.env.ETHERSCAN_APIKEY) {
+    console.log("--Contract Verifying-------");
+    await verify(DonationContract.address, arguments);
+    console.log("--Contract verified-------");
+  }
 };
 
 module.exports.tags = ["all", "donation"];

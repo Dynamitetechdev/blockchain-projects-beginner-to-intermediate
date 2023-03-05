@@ -14,7 +14,7 @@ contract Donate is ReentrancyGuard {
     address[] private donatorList;
 
     address private owner;
-    uint private MINIMUM_VALUE = 1e8;
+    uint private MINIMUM_VALUE = 1000;
     //mappings
     mapping(address => uint) public balanceOf;
     //Events

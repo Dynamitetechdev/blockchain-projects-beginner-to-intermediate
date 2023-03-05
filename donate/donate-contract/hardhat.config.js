@@ -8,7 +8,9 @@ require("dotenv").config();
 /** @type import('hardhat/config').HardhatUserConfig */
 
 const RPC = process.env.GOERLI_RPC;
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY1 = process.env.PRIVATE_KEY1;
+const PRIVATE_KEY2 = process.env.PRIVATE_KEY2;
+const privateKeys = [PRIVATE_KEY1, PRIVATE_KEY2];
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
@@ -18,7 +20,7 @@ module.exports = {
     },
     goerli: {
       url: RPC,
-      accounts: [PRIVATE_KEY],
+      accounts: privateKeys,
       chainId: 5,
       blockConfirmations: 6,
     },
@@ -30,7 +32,7 @@ module.exports = {
       default: 0,
       5: 0,
     },
-    player: {
+    user: {
       default: 1,
       5: 1,
     },

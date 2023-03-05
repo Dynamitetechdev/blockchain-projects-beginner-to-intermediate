@@ -3,6 +3,8 @@ import { ABI, ContractAddressess } from "@/constants";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useNotification } from "web3uikit";
+import { useQuery } from "@apollo/client";
+import GET_EVENT from "@/constants/subgraph";
 const FuncRun = () => {
   const [tokenInputValue, setTokenInputValue] = useState(0);
   const [notify, setNotify] = useState(false);
@@ -11,11 +13,11 @@ const FuncRun = () => {
   const [donatorList, setDonatorList] = useState([]);
   const [contractBalance, setContractBalance] = useState("0");
   const { chainId: chainIdHex, isWeb3Enabled, account } = useMoralis();
-  const chainId = parseInt(chainIdHex);
-
-  console.log(`Account Connected: ${account}`);
+  const chainId = chainIdHex ? parseInt(chainIdHex).toString() : "31337";
   const donateContractAddress =
     chainId in ContractAddressess ? ContractAddressess[chainId][0] : null;
+
+  const { data: event, loading, error } = useQuery(GET_EVENT);
 
   const { runContractFunction: payFee } = useWeb3Contract({
     functionName: "payFee",
@@ -47,10 +49,10 @@ const FuncRun = () => {
   });
 
   const updateUI = async () => {
-    const listOfDonatorResponse = await getDonatorList();
+    // const listOfDonatorResponse = await getDonatorList();
     const getBalanceTx = (await getBalance()).toString();
     setContractBalance(getBalanceTx);
-    setDonatorList(listOfDonatorResponse);
+    setDonatorList(event ? event.feeDonateds : []);
   };
 
   const dispatch = useNotification();
@@ -111,7 +113,15 @@ const FuncRun = () => {
   };
 
   const listOfDonators =
-    donatorList && donatorList.map((eachDonator) => <p>{eachDonator}</p>);
+    donatorList &&
+    donatorList.map((eachDonator) => (
+      <div className="donator_details">
+        <p>Donator Address: {eachDonator.donator}</p>
+        <p className="amount_donated">
+          Amount Donated:{eachDonator.amountDonated}
+        </p>
+      </div>
+    ));
 
   useEffect(() => {
     if (isWeb3Enabled) {

@@ -14,3 +14,9 @@
   text-decoration: none;
   margin: 0 20px;
 }
+.donator_details{
+  display: flex;
+}
+.donator_details p{
+  margin-right: 2em;
+}

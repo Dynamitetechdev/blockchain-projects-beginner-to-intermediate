@@ -1,0 +1,24 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: donateContract
+    network: goerli
+    source:
+      address: "0xC0712d9F75255f1D340AB0c117c0FbCD5296D842"
+      abi: donateContract
+      startBlock: 8602043
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - feeDonated
+      abis:
+        - name: donateContract
+          file: ./abis/donateContract.json
+      eventHandlers:
+        - event: feeDonated(indexed uint256,indexed address)
+          handler: handlefeeDonated
+      file: ./src/donate-contract.ts

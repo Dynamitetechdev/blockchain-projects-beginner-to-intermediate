@@ -1,0 +1,8 @@
+type feeDonated @entity(immutable: true) {
+  id: Bytes!
+  amountDonated: BigInt! # uint256
+  donator: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

@@ -1,0 +1,8 @@
+{
+  "goerli": {
+    "donateContract": {
+      "address": "0xC0712d9F75255f1D340AB0c117c0FbCD5296D842",
+      "startBlock": 8602043
+    }
+  }
+}

@@ -115,7 +115,7 @@ const FuncRun = () => {
   const listOfDonators =
     donatorList &&
     donatorList.map((eachDonator) => (
-      <div className="donator_details">
+      <div className="donator_details" key={eachDonator.id}>
         <p>Donator Address: {eachDonator.donator}</p>
         <p className="amount_donated">
           Amount Donated:{eachDonator.amountDonated}
@@ -152,6 +152,7 @@ const FuncRun = () => {
 
         <hr />
         <h1>Donator</h1>
+        {loading && <p>Loading...</p>}
         <div className="list_of_donators">{listOfDonators}</div>
       </div>
     </div>

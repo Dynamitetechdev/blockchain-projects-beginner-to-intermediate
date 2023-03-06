@@ -7,7 +7,7 @@ const donate = async () => {
   const donatedTx = await DonationContract.payFee({
     value: oneEth,
   });
-  await donatedTx.wait(6);
+  await donatedTx.wait(1);
 
   console.log("payment successful");
 };

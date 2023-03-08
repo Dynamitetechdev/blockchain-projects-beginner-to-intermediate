@@ -1,0 +1,38 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/BQToken.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.7;\nimport \"./context/context.sol\";\n\nerror BQtoken_cannotBeTheZeroAddress();\nerror BQtoken_NotEnoughBalance();\n\ncontract BQtoken is Context {\n    string private _name;\n    string private _symbol;\n    uint private _totalSupply;\n    uint32 constant DECIMALS = 18;\n    uint256 private ownerMintToken = 500000 * 10 ** 18;\n\n    mapping(address => uint256) private balanceOf;\n    mapping(address => mapping(address => uint256)) private _allowance;\n\n    event Transfer(\n        address indexed _from,\n        address indexed _to,\n        uint256 indexed _value\n    );\n    event Approval(\n        address indexed _owner,\n        address indexed _spender,\n        uint256 indexed _value\n    );\n    event tokenMinted(address indexed Account, uint indexed AmountedMinted);\n\n    constructor() {\n        _name = \"BeuniQue\";\n        _symbol = \"BQT\";\n\n        _mint(Owner(), ownerMintToken);\n    }\n\n    function name() public view returns (string memory) {\n        return _name;\n    }\n\n    function symbol() public view returns (string memory) {\n        return _symbol;\n    }\n\n    function decimals() public pure returns (uint) {\n        return DECIMALS;\n    }\n\n    function totalSupply() public view returns (uint) {\n        return _totalSupply;\n    }\n\n    function approve(address _spender, uint256 _value) public returns (bool) {\n        _approve(msg.sender, _spender, _value);\n        return true;\n    }\n\n    /* \n    1. the owner and spender should not be the zero address\n    2. check if the owner has more than the approved funds\n    3. update the allowance of the spender\n    */\n\n    function _approve(address owner, address spender, uint amount) internal {\n        owner = Owner();\n        if (owner == address(0)) revert BQtoken_cannotBeTheZeroAddress();\n        if (spender == address(0)) revert BQtoken_cannotBeTheZeroAddress();\n        if (balanceOf[owner] <= amount) revert BQtoken_NotEnoughBalance();\n        _allowance[owner][spender] += amount;\n        emit Approval(owner, spender, amount);\n    }\n\n    function allowance(\n        address _owner,\n        address _spender\n    ) public view returns (uint256) {\n        return _allowance[_owner][_spender];\n    }\n\n    function transfer(address _to, uint256 _value) public returns (bool) {\n        _transfer(msg.sender, _to, _value);\n        return true;\n    }\n\n    /* \n    1. the owner and to cant be the zero address\n    2. check if the owner have enough to transfer\n    3. subtract from the amount from the owner balance\n    4. Add the amount to to TO balance\n    */\n    function _transfer(address _owner, address _to, uint amount) internal {\n        _owner = Owner();\n\n        if (_owner == address(0)) revert BQtoken_cannotBeTheZeroAddress();\n        if (_to == address(0)) revert BQtoken_cannotBeTheZeroAddress();\n\n        uint ownerBalance = balanceOf[_owner];\n        if (ownerBalance <= amount) revert BQtoken_NotEnoughBalance();\n        balanceOf[_owner] -= amount;\n        balanceOf[_to] += amount;\n\n        emit Transfer(_owner, _to, amount);\n    }\n\n    /* \n    1. Check if the owner is enough to transfer to the spender\n    2. Address cannot be the zero address. already in the _transfer logic\n    3. check if the current allowance is enough to transferFrom\n    4. we transfer using the _transfer logic \n    5. and we will also update Approve using the _approve logic and subtract the Value from the spenders approved funds\n    */\n    function transferFrom(\n        address _owner,\n        address _spender,\n        uint256 _value\n    ) public returns (bool) {\n        uint currentAllowance = _allowance[_owner][_spender];\n\n        if (currentAllowance != type(uint256).max) {\n            if (currentAllowance <= _value) revert BQtoken_NotEnoughBalance();\n            _approve(_owner, _spender, currentAllowance - _value);\n        }\n        _transfer(_owner, _spender, _value);\n        return true;\n    }\n\n    /* \n    1. make sure the accountMinting is the msg.sender\n    2. the account must not be the zero address\n    3. add the amount minted to our total supply\n    4. add the amount minted to the senders address\n    5. emit event\n    \n    */\n    function _mint(address account, uint amount) private {\n        account = Owner();\n        amount = ownerMintToken;\n        if (account == address(0)) revert BQtoken_cannotBeTheZeroAddress();\n        _totalSupply += amount;\n        balanceOf[account] += amount;\n        emit tokenMinted(account, amount);\n    }\n}\n"
+    },
+    "contracts/context/context.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.7;\n\nabstract contract Context {\n    function Owner() internal view virtual returns (address) {\n        return msg.sender;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

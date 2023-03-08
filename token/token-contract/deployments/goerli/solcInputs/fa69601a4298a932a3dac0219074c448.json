@@ -1,0 +1,38 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/BQToken.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity >0.5.0 <=0.9.0;\nimport \"./context/context.sol\";\n\nerror DNM_zeroAddress(string errorMessage);\nerror DNM_lowAllowance();\nerror DNM_lowFunds();\n\ncontract BQToken is Context {\n    //Events\n    event Transfer(\n        address indexed _from,\n        address indexed _to,\n        uint256 indexed _value\n    );\n    event Approval(\n        address indexed _owner,\n        address indexed _spender,\n        uint256 indexed _value\n    );\n\n    mapping(address => uint256) private _balanceOf;\n    mapping(address => mapping(address => uint256)) private _allowance;\n\n    string private _name;\n    string private _symbol;\n    uint256 private _totalSupply;\n    uint32 constant _decimals = 18;\n    uint256 private ownerMintToken = 500000 * 10 ** 18;\n\n    constructor() {\n        _name = \"BQToken\";\n        _symbol = \"BQT\";\n\n        _mint(Owner(), ownerMintToken);\n    }\n\n    function name() public view returns (string memory tokenName) {\n        tokenName = _name;\n    }\n\n    function symbol() public view returns (string memory tokenSymbol) {\n        tokenSymbol = _symbol;\n    }\n\n    function decimals() public pure returns (uint256) {\n        return _decimals;\n    }\n\n    function totalSupply() public view returns (uint) {\n        return _totalSupply;\n    }\n\n    function balanceOf(address account) public view returns (uint256) {\n        return _balanceOf[account];\n    }\n\n    function ownerAddress() public view returns (address) {\n        return Owner();\n    }\n\n    function allowance(\n        address owner,\n        address spender\n    ) public view returns (uint256) {\n        return _allowance[owner][spender];\n    }\n\n    function transfer(address _to, uint256 _value) public returns (bool) {\n        address owner = Owner();\n        _transfer(owner, _to, _value);\n        return true;\n    }\n\n    //_tranfer\n    //Required Condition\n    //1. from and to must not be the zero(0) account/address\n    //2. from balance must be >= amount\n    //3. subtract amount from `from` balance\n    //4. add amount to `to` balance\n    function _transfer(address from, address to, uint256 amount) internal {\n        if (from == address(0)) revert DNM_zeroAddress(\"Zero Address Detected\");\n        if (to == address(0)) revert DNM_zeroAddress(\"Zero Address Detected\");\n\n        uint256 fromBalance = _balanceOf[from];\n        if (fromBalance >= amount) revert DNM_lowFunds();\n        unchecked {\n            _balanceOf[from] = fromBalance - amount;\n            _balanceOf[to] += amount;\n        }\n\n        emit Transfer(from, to, amount);\n    }\n\n    function approve(\n        address spender,\n        uint256 approvedAmount\n    ) public returns (bool) {\n        address owner = Owner();\n        _approve(owner, spender, approvedAmount);\n        return true;\n    }\n\n    function _approve(\n        address _owner,\n        address _spender,\n        uint256 _approvedAmount\n    ) internal {\n        if (_owner == address(0))\n            revert DNM_zeroAddress(\"Zero Address Detected\");\n        if (_spender == address(0))\n            revert DNM_zeroAddress(\"Zero Address Detected\");\n        _allowance[_owner][_spender] = _approvedAmount;\n\n        emit Approval(_owner, _spender, _approvedAmount);\n    }\n\n    function transferFrom(\n        address owner,\n        address spender, //to address we are transfer to\n        uint256 amount\n    ) public returns (bool) {\n        uint256 currentAllowance = _allowance[owner][spender];\n        if (currentAllowance != type(uint256).max) {\n            if (currentAllowance >= amount) revert DNM_lowAllowance();\n            _approve(owner, spender, currentAllowance - amount);\n        }\n        //make the transfers\n        _transfer(owner, spender, amount);\n        return true;\n    }\n\n    function _increaseAllowance(\n        address _spender,\n        uint256 _amount\n    ) public returns (bool) {\n        address owner = Owner();\n        uint256 currentAllowance = allowance(owner, _spender);\n        _approve(owner, _spender, currentAllowance + _amount);\n        return true;\n    }\n\n    function _descreaseAllowance(\n        address _spender,\n        uint256 substractedValue\n    ) public returns (bool) {\n        address owner = Owner();\n        uint256 currentAllowance = allowance(owner, _spender);\n        if (currentAllowance >= substractedValue) revert DNM_lowAllowance();\n        _approve(owner, _spender, currentAllowance - substractedValue);\n        return true;\n    }\n\n    function _mint(address account, uint amount) private {\n        account = Owner();\n        amount = ownerMintToken;\n        if (account == address(0))\n            revert DNM_zeroAddress(\"Zero Address Detected\");\n        _totalSupply += amount;\n        _balanceOf[account] += amount;\n        emit Transfer(address(0), account, amount);\n    }\n}\n"
+    },
+    "contracts/context/context.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.7;\n\nabstract contract Context {\n    function Owner() internal view virtual returns (address) {\n        return msg.sender;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

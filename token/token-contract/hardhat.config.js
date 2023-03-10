@@ -10,6 +10,7 @@ require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const GOERLI_RPC = process.env.GOERLI_RPC;
+const SEPOLIA_RPC = process.env.SEPOLIA_RPC;
 module.exports = {
   solidity: "0.8.17",
 
@@ -23,6 +24,13 @@ module.exports = {
       url: GOERLI_RPC,
       accounts: [PRIVATE_KEY],
       chainId: 5,
+      blockConfirmations: 6,
+    },
+
+    sepolia: {
+      url: SEPOLIA_RPC,
+      accounts: [PRIVATE_KEY],
+      chainId: 11155111,
       blockConfirmations: 6,
     },
   },

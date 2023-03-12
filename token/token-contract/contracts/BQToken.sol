@@ -4,6 +4,7 @@ import "./context/context.sol";
 
 error BQtoken_cannotBeTheZeroAddress();
 error BQtoken_NotEnoughBalance();
+error BQtoken_NotEnoughBalancce();
 
 contract BQtoken is Context {
     string private _name;
@@ -74,7 +75,7 @@ contract BQtoken is Context {
         if (owner == address(0)) revert BQtoken_cannotBeTheZeroAddress();
         if (spender == address(0)) revert BQtoken_cannotBeTheZeroAddress();
         if (_balanceOf[owner] <= amount) revert BQtoken_NotEnoughBalance();
-        _allowance[owner][spender] += amount;
+        _allowance[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
 
@@ -121,14 +122,22 @@ contract BQtoken is Context {
         address _spender,
         uint256 _value
     ) public returns (bool) {
-        uint currentAllowance = _allowance[_owner][_spender];
-
-        if (currentAllowance != type(uint256).max) {
-            if (currentAllowance <= _value) revert BQtoken_NotEnoughBalance();
-            _approve(_owner, _spender, currentAllowance - _value);
-        }
+        address spender = Owner();
+        _spendAllowance(_owner, spender, _value);
         _transfer(_owner, _spender, _value);
         return true;
+    }
+
+    function _spendAllowance(
+        address owner,
+        address spender,
+        uint256 value
+    ) internal {
+        uint currentAllowance = _allowance[owner][spender];
+        if (currentAllowance != type(uint256).max) {
+            if (currentAllowance <= value) revert BQtoken_NotEnoughBalancce();
+            _approve(owner, spender, currentAllowance - value);
+        }
     }
 
     /* 

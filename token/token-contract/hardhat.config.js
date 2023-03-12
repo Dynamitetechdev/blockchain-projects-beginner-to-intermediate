@@ -45,6 +45,7 @@ module.exports = {
   etherscan: {
     apiKey: {
       goerli: "VDPYH9I76NQNVCB1J68BGN5CV8BM7NPQSB",
+      sepolia: "XBSX3YY9DUTU3W1MQXA8CP83PA16IPHW5F",
     },
   },
 

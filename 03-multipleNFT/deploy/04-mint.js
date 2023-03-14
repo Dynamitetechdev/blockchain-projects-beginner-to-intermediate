@@ -16,8 +16,11 @@ module.exports = async ({ getNamedAccounts }) => {
   const tx = await DifferNFT.Mint(789);
   await tx.wait(1);
 
-  const getTokenURI = await DifferNFT.lowSVGTOURI();
-  console.log(getTokenURI);
+  const getTokenURI = await DifferNFT.tokenURI(0);
+  console.log("TOKEN URI:" + getTokenURI);
+
+  const getImageURI = await DifferNFT.highSVGTOURI();
+  console.log("Image URI:" + getImageURI);
   // await getTokenURI.wait(1);
 };
 

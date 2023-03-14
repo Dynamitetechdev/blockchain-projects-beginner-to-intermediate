@@ -13,20 +13,24 @@ contract DifferNFT is ERC721 {
     // string private constant
     mapping(uint256 => uint256) private s_tokenIdToValue;
 
-    constructor(string memory LowNFTSvg) ERC721("differNFT", "DNFT") {
+    constructor(
+        string memory LowNFTSvg,
+        string memory highNFTSvg
+    ) ERC721("differNFT", "DNFT") {
         s_tokenId = 0;
         s_LowPriceNFT = svgToURI(LowNFTSvg);
+        s_HighPriceNFT = svgToURI(highNFTSvg);
     }
 
-    function svgToURI(string memory svg) internal pure returns (string memory) {
+    function svgToURI(string memory svg) internal view returns (string memory) {
         string memory svgToBytes = Base64.encode(
             bytes(string(abi.encodePacked(svg)))
         );
-        return string(abi.encodePacked(_baseURI(), svgToBytes));
+        return string(abi.encodePacked(baseURI, svgToBytes));
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "data:image/svg+xml;base64,";
+        return "data:application/json;base64,";
     }
 
     function Mint(uint256 value) public {
@@ -68,5 +72,9 @@ contract DifferNFT is ERC721 {
     // will give us the base64 string of our lowSVG
     function lowSVGTOURI() public view returns (string memory) {
         return s_LowPriceNFT;
+    }
+
+    function highSVGTOURI() public view returns (string memory) {
+        return s_HighPriceNFT;
     }
 }

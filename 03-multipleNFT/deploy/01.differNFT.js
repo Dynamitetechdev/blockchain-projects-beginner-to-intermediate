@@ -21,7 +21,10 @@ module.exports = async ({ deployments, getNamedAccounts }) => {
   const lowSVG = fs.readFileSync("./images/dynamicNFT/frown.svg", {
     encoding: "utf8",
   });
-  const args = [lowSVG];
+  const highSVG = fs.readFileSync("./images/dynamicNFT/happy.svg", {
+    encoding: "utf8",
+  });
+  const args = [lowSVG, highSVG];
   const BasicNFTContract = await deploy("DifferNFT", {
     from: deployer,
     args: args,

@@ -1,22 +1,26 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.11;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 error RandomNFT_notEnough();
 error RandomNFT_outOfBounds();
 error RandomNFT_nothingToWithdraw();
 error RandomNFT_withdrawFailed();
+error RandomNFT_cannotBeTheZeroAddress();
 
 contract RandomNFT is
     ERC721URIStorage,
     VRFConsumerBaseV2,
     Ownable,
-    ReentrancyGuard
+    ReentrancyGuard,
+    Pausable
 {
     enum NFTS {
         Basic,
@@ -47,7 +51,6 @@ contract RandomNFT is
         address indexed mintRequester
     );
     event NFT_Request_Fulfiled(
-        uint256 indexed s_tokenId,
         address indexed requesterAddress,
         uint256 indexed requestId
     );
@@ -67,7 +70,8 @@ contract RandomNFT is
         NFT_URI = _NFT_URI;
     }
 
-    function Mint(uint256 mintFee) public payable {
+    function Mint(uint256 mintFee) public payable whenNotPaused {
+        if (msg.sender == address(0)) revert RandomNFT_cannotBeTheZeroAddress();
         if (msg.value < mintFee) revert RandomNFT_notEnough();
         i_requestId = i_VFRcoordinator.requestRandomWords(
             i_keyHash,
@@ -92,7 +96,7 @@ contract RandomNFT is
         _setTokenURI(s_tokenId, NFT_URI[uint256(fulfillledNFT)]);
         s_tokenId += 1;
 
-        emit NFT_Request_Fulfiled(s_tokenId, requesterAddress, requestId);
+        emit NFT_Request_Fulfiled(requesterAddress, requestId);
     }
 
     function getProbability(uint256 moddedValue) public pure returns (NFTS) {
@@ -102,12 +106,16 @@ contract RandomNFT is
         for (uint index = 0; index < _probabilityArr.length; index++) {
             if (
                 moddedValue >= cummulativeSum &&
-                moddedValue < cummulativeSum + _probabilityArr[index]
+                moddedValue <
+                SafeMath.add(cummulativeSum, _probabilityArr[index])
             ) {
                 return NFTS(index);
             }
 
-            cummulativeSum += _probabilityArr[index];
+            cummulativeSum = SafeMath.add(
+                cummulativeSum,
+                _probabilityArr[index]
+            );
         }
 
         revert RandomNFT_outOfBounds();
@@ -127,5 +135,9 @@ contract RandomNFT is
 
     function getTokenURI(uint URI_INDEX) public view returns (string memory) {
         return NFT_URI[URI_INDEX];
+    }
+
+    function pause() public onlyOwner {
+        _pause();
     }
 }

@@ -5,11 +5,19 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 error RandomNFT_notEnough();
 error RandomNFT_outOfBounds();
+error RandomNFT_nothingToWithdraw();
+error RandomNFT_withdrawFailed();
 
-contract RandomNFT is ERC721URIStorage, VRFConsumerBaseV2, Ownable {
+contract RandomNFT is
+    ERC721URIStorage,
+    VRFConsumerBaseV2,
+    Ownable,
+    ReentrancyGuard
+{
     enum NFTS {
         Basic,
         Standard,
@@ -105,11 +113,19 @@ contract RandomNFT is ERC721URIStorage, VRFConsumerBaseV2, Ownable {
         revert RandomNFT_outOfBounds();
     }
 
+    function withdraw() public onlyOwner nonReentrant {
+        uint256 balance = address(this).balance;
+        if (balance <= 0) revert RandomNFT_nothingToWithdraw();
+        (bool success, ) = payable(msg.sender).call{value: balance}("");
+        if (!success) revert RandomNFT_withdrawFailed();
+        assert(balance == 0);
+    }
+
     function probabilityArr() public pure returns (uint256[3] memory) {
         return [10, 30, MAX_VALUE];
     }
 
-    function tokenURI() public pure returns (string memory) {
-        return "your nft";
+    function getTokenURI(uint URI_INDEX) public view returns (string memory) {
+        return NFT_URI[URI_INDEX];
     }
 }
